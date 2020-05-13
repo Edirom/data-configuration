@@ -4,6 +4,7 @@
   xmlns:math="http://www.w3.org/2005/xpath-functions/math"
   xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl"
   xmlns:mei="http://www.music-encoding.org/ns/mei"
+  xmlns:vife="https://edirom.de/ns/xslt"
   exclude-result-prefixes="xs math xd mei"
   version="3.0">
   <xd:doc scope="stylesheet">
@@ -14,6 +15,9 @@
     </xd:desc>
   </xd:doc>
   <xsl:output indent="yes" method="xml"/>
+  
+  <xsl:variable name="harmonize.output" select="'harm.thirds-based-chords.label.plain'"/>
+  <xsl:variable name="harmonize.suppress.duplicates" select="true()"/>
   
   <xsl:include href="../tools/pick.mdiv.xsl"/>
   <xsl:include href="../tools/rescore.parts.xsl"/>
@@ -32,12 +36,10 @@
   <xsl:include href="../anl/interprete.harmonies.xsl"/>
   
   <xsl:include href="../data/circleOf5.xsl"/>
-  <xsl:include href="../data/circleOf5.xsl"/>
   <xsl:include href="../data/keyMatrix.xsl"/>
   
   <xsl:include href="../compare/identify.identity.xsl"/>
   <xsl:include href="../compare/compare.event.density.xsl"/>
-  <xsl:include href="../compare/compare.harmonics.xsl"/>
   <xsl:include href="../compare/determine.variation.xsl"/>
   <xsl:include href="../compare/adjust.rel.oct.xsl"/>
   <xsl:include href="../compare/cleanupDynam.xsl"/>
@@ -50,7 +52,9 @@
       <xsl:apply-templates select="$first.file.raw" mode="rescore.parts"/>
     </xsl:variable>
     <xsl:variable name="added.ids" as="node()">
-      <xsl:apply-templates select="$rescored.parts" mode="add.id"/>
+      <xsl:apply-templates select="$rescored.parts" mode="add.id">
+        <xsl:with-param name="inside" select="'section'" as="xs:string" tunnel="yes"/>
+      </xsl:apply-templates>
     </xsl:variable>
     <xsl:variable name="added.tstamps" as="node()">
       <xsl:apply-templates select="$added.ids" mode="add.tstamps"/>
@@ -69,7 +73,9 @@
       <xsl:apply-templates select="$second.file.raw" mode="rescore.parts"/>
     </xsl:variable>
     <xsl:variable name="added.ids" as="node()">
-      <xsl:apply-templates select="$rescored.parts" mode="add.id"/>
+      <xsl:apply-templates select="$rescored.parts" mode="add.id">
+        <xsl:with-param name="inside" select="'section'" as="xs:string" tunnel="yes"/>
+      </xsl:apply-templates>
     </xsl:variable>
     <xsl:variable name="added.tstamps" as="node()">
       <xsl:apply-templates select="$added.ids" mode="add.tstamps"/>
@@ -150,7 +156,7 @@
     
     <xsl:variable name="corresponding.measure" select="($second.file//mei:measure)[$pos + 1]" as="node()?"/>
     
-    <xsl:sequence select="bw:combineFiles-evaluatePrecedingScoreDef($this.measure,$corresponding.measure)"/>
+    <xsl:sequence select="vife:combineFiles-evaluatePrecedingScoreDef($this.measure,$corresponding.measure)"/>
     
     <xsl:copy>
       <xsl:apply-templates select="mei:staff | @*" mode="#current"/>
@@ -201,7 +207,7 @@
     <xsl:attribute name="n" select="number(.) + 2"/>
   </xsl:template>
   
-  <xsl:function name="bw:combineFiles-evaluatePrecedingScoreDef" as="node()?">
+  <xsl:function name="vife:combineFiles-evaluatePrecedingScoreDef" as="node()?">
     <xsl:param name="measure.1" as="node()"/>
     <xsl:param name="measure.2" as="node()"/>
     
