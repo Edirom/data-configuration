@@ -29,19 +29,19 @@
     
     -->
     
-    <xsl:include href="tools/transpose.xsl"/>
-    <xsl:include href="data/circleOf5.xsl"/>
-    <xsl:include href="data/keyMatrix.xsl"/>
+    <xsl:include href="../tools/transpose.xsl"/>
+    <xsl:include href="../data/circleOf5.xsl"/>
+    <xsl:include href="../data/keyMatrix.xsl"/>
     
-    <xsl:include href="compare/identify.identity.xsl"/>
-    <xsl:include href="compare/compare.event.density.xsl"/>
-    <xsl:include href="compare/compare.harmonics.xsl"/>
+    <xsl:include href="../compare/identify.identity.xsl"/>
+    <xsl:include href="../compare/compare.event.density.xsl"/>
+    <xsl:include href="../compare/compare.harmonics.xsl"/>
     
-    <xsl:include href="compare/determine.variation.xsl"/>
+    <xsl:include href="../compare/determine.variation.xsl"/>
     
-    <xsl:include href="compare/adjust.rel.oct.xsl"/>
+    <xsl:include href="../compare/adjust.rel.oct.xsl"/>
     
-    <xsl:include href="compare/cleanupDynam.xsl"/>
+    <xsl:include href="../compare/cleanupDynam.xsl"/>
     
     <xsl:variable name="first.file" as="node()">
         
@@ -85,14 +85,7 @@
         <xsl:choose>
             <!-- no transposing for melodicComparison on file 1 (this is a hack!) -->
             <xsl:when test="$method = 'melodicComparison'">
-                <xsl:choose>
-                    <xsl:when test="$comparison.file/@xml:id = 'x418650e0-d899-4e3d-bff3-f7d459e1d5d7'">
-                        <xsl:apply-templates select="//mei:mei[2]" mode="special.transpose"/>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:sequence select="//mei:mei[2]"/>
-                    </xsl:otherwise>
-                </xsl:choose>
+                <xsl:sequence select="//mei:mei[2]"/>
             </xsl:when>
             <!-- no file shall be transposed -->
             <xsl:when test="$transpose.mode = 'none'">
@@ -127,7 +120,6 @@
         </xsl:choose>
         
     </xsl:variable>
-    <xsl:variable name="comparison.file" select="//mei:meiCorpus[1]" as="node()"/>
     <xsl:variable name="first.file.staff.count" select="count(($first.file//mei:scoreDef)[1]//mei:staffDef)" as="xs:integer"/>
     <xsl:variable name="second.file.staff.count" select="count(($second.file//mei:scoreDef)[1]//mei:staffDef)" as="xs:integer"/>
     
@@ -158,25 +150,10 @@
                 <xsl:when test="$method = 'melodicComparison'">
                     
                     <results>
-                            
                         <file n="1">
                             <xsl:apply-templates select="$first.file//mdiv/@*" mode="#current"/>
-                            <xsl:choose>
-                                <xsl:when test="$comparison.file/@xml:id = 'x68ad7295-58c5-48a0-a321-fcf8a779551f'">
-                                    <xsl:copy-of select="$second.file//mdiv/measure[position() lt 4]"/>
-                                    <xsl:variable name="offset" select="1.625" as="xs:double"/>
-                                    <xsl:apply-templates select="$first.file//mdiv/measure" mode="special.pushing">
-                                        <xsl:with-param name="offset" select="$offset" tunnel="yes"/>
-                                    </xsl:apply-templates>
-                                    <xsl:apply-templates select="$first.file//mdiv/staff" mode="special.pushing">
-                                        <xsl:with-param name="offset" select="$offset" tunnel="yes"/>
-                                    </xsl:apply-templates>
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <xsl:copy-of select="$first.file//mdiv/measure"/>
-                                    <xsl:copy-of select="$first.file//mdiv/staff"/>
-                                </xsl:otherwise>
-                            </xsl:choose>
+                            <xsl:copy-of select="$first.file//mdiv/measure"/>
+                            <xsl:copy-of select="$first.file//mdiv/staff"/>
                         </file>
                         <file n="2">
                             <xsl:apply-templates select="$second.file//mdiv/@*" mode="#current"/>
@@ -259,117 +236,8 @@
         <xsl:variable name="this.measure" select="." as="node()"/>
         <xsl:variable name="pos" select="count(preceding::mei:measure)" as="xs:integer"/>
         
-        <!-- TODO: remove dirty hack! -->
-        <xsl:variable name="off" select="if($comparison.file/@xml:id = 'x68ad7295-58c5-48a0-a321-fcf8a779551f') then(3) else(0)" as="xs:integer"/>
-        <xsl:variable name="corresponding.measure" select="($second.file//mei:measure)[$pos + 1 + $off]" as="node()?"/>
+        <xsl:variable name="corresponding.measure" select="($second.file//mei:measure)[$pos + 1]" as="node()?"/>
         
-        <!--<xsl:choose>
-            <!-\- this measure has been added -\->
-            <xsl:when test="$comparison.file//mei:annot[@type = 'additional.measures' and $this.measure/@xml:id = tokenize(replace(@plist,'[a-zA-Z_\.\d/]*#',''),' ')]">
-                <xsl:comment>This is added</xsl:comment>
-            </xsl:when>
-            <!-\- the corresponding measure has been added -\->
-            <xsl:when test="$comparison.file//mei:annot[@type = 'additional.measures' and $corresponding.measure/@xml:id = tokenize(replace(@plist,'[a-zA-Z_\.\d/]*#',''),' ')]">
-                <xsl:comment>Corresponding is added</xsl:comment>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:copy-of select="$comparison.file"></xsl:copy-of>
-                <xsl:comment select="'annots: ' || count($comparison.file//mei:annot[@type = 'additional.measures'])"></xsl:comment>
-            </xsl:otherwise>
-        </xsl:choose>-->
-        
-        <!-- TODO: remove dirty hack! -->
-        <xsl:if test="$comparison.file/@xml:id = 'x68ad7295-58c5-48a0-a321-fcf8a779551f' and count(preceding::mei:measure) = 0">
-            <measure xmlns="http://www.music-encoding.org/ns/mei" n="0">
-                <staff type="file1" n="1">
-                    <layer>
-                        <space dur="8"/>
-                    </layer>
-                </staff>
-                <staff type="file1" n="2">
-                    <layer>
-                        <space dur="8"/>
-                    </layer>
-                </staff>
-                <staff type="file1" n="3">
-                    <layer>
-                        <space dur="8"/>
-                    </layer>
-                </staff>
-                <staff type="file1" n="4">
-                    <layer>
-                        <space dur="8"/>
-                    </layer>
-                </staff>
-                <xsl:apply-templates select="($second.file//mei:measure)[1]/child::node()" mode="first.pass.file.2"/>
-            </measure>
-            <measure xmlns="http://www.music-encoding.org/ns/mei" n="1">
-                <staff type="file1" n="1">
-                    <layer>
-                        <space dur="2" dots="1"/>
-                    </layer>
-                </staff>
-                <staff type="file1" n="2">
-                    <layer>
-                        <space dur="2" dots="1"/>
-                    </layer>
-                </staff>
-                <staff type="file1" n="3">
-                    <layer>
-                        <space dur="2" dots="1"/>
-                    </layer>
-                </staff>
-                <staff type="file1" n="4">
-                    <layer>
-                        <space dur="2" dots="1"/>
-                    </layer>
-                </staff>
-                <xsl:apply-templates select="($second.file//mei:measure)[2]/child::node()" mode="first.pass.file.2"/>
-            </measure>
-            <measure xmlns="http://www.music-encoding.org/ns/mei" n="2">
-                <staff type="file1" n="1">
-                    <layer>
-                        <space dur="2" dots="1"/>
-                    </layer>
-                </staff>
-                <staff type="file1" n="2">
-                    <layer>
-                        <space dur="2" dots="1"/>
-                    </layer>
-                </staff>
-                <staff type="file1" n="3">
-                    <layer>
-                        <space dur="2" dots="1"/>
-                    </layer>
-                </staff>
-                <staff type="file1" n="4">
-                    <layer>
-                        <space dur="2" dots="1"/>
-                    </layer>
-                </staff>
-                <xsl:apply-templates select="($second.file//mei:measure)[3]/child::node()" mode="first.pass.file.2"/>
-            </measure>
-        </xsl:if>
-        
-        
-        <!-- check for scoreDefs in one of the files -->
-        
-        
-        <!--<xsl:template match="mei:scoreDef" mode="first.pass">
-            <xsl:variable name="pos" select="count(preceding::mei:scoreDef) + 1" as="xs:integer"/>
-            
-            <scoreDef xmlns="http://www.music-encoding.org/ns/mei">
-                <xsl:apply-templates select="@meter.count | @meter.unit" mode="#current"/>
-                <staffGrp label="" symbol="none" bar.thru="false">
-                    <staffGrp symbol="brace" bar.thru="true">
-                        <xsl:apply-templates select=".//mei:staffDef" mode="first.pass"/>
-                    </staffGrp>
-                    <staffGrp symbol="brace" bar.thru="true">
-                        <xsl:apply-templates select="($second.file//mei:scoreDef)[$pos]//mei:staffDef" mode="first.pass.file.2"/>
-                    </staffGrp>
-                </staffGrp>
-            </scoreDef>
-        </xsl:template>-->
         <xsl:sequence select="bw:combineFiles-evaluatePrecedingScoreDef($this.measure,$corresponding.measure)"/>
         
         <xsl:copy>
@@ -420,8 +288,6 @@
     <xsl:template match="*:measure/@n" mode="special.pushing">
         <xsl:attribute name="n" select="number(.) + 2"/>
     </xsl:template>
-    
-    
     
     <xsl:function name="bw:combineFiles-evaluatePrecedingScoreDef" as="node()?">
         <xsl:param name="measure.1" as="node()"/>

@@ -10,7 +10,7 @@
             <xd:p>
                 <xd:b>Created on:</xd:b> Mar 23, 2018</xd:p>
             <xd:p>
-                <xd:b>Author:</xd:b> johannes</xd:p>
+                <xd:b>Author:</xd:b> Johannes Kepper</xd:p>
             <xd:p> This file acts as driver for various analytical xslts, to be applied on one or
                 more MEI files. </xd:p>
         </xd:desc>
@@ -23,56 +23,58 @@
         'harmonicComparison' -
         'eventDensity' -
     -->
-    <xsl:param name="mode"/>
-
-    <xsl:param name="mdiv"/>
+    <xsl:param name="mode" select="'comparison'" as="xs:string"/>
+    
+    <!-- the number of the mdiv to be compared -->
+    <xsl:param name="mdiv" select="'1'" as="xs:string"/>
+    
     <!-- allowed values for param $transpose.mode are:
         'none'
         'matchFile1'
         'matchFile2'
         'C'
     -->
-    <xsl:param name="transpose.mode"/>
+    <xsl:param name="transpose.mode" select="'none'" as="xs:string"/>
     
     <!-- a list of hidden staves (by @n), separated by comma. Empty string if full score shall be shown -->
-    <xsl:param name="hidden.staves"/>
+    <xsl:param name="hidden.staves" select="''" as="xs:string"/>
 
     <!-- decide whether potential arpeggios shall be resolved for a harmonic analysis -->
-    <xsl:param name="resolve.arpegs" select="true()"/>
+    <xsl:variable name="resolve.arpegs" select="true()"/>
     
     <!-- generate harm elements only for accented / important tstamps -->
-    <xsl:param name="harmonize.important.tstamps.only" select="true()"/>
+    <xsl:variable name="harmonize.important.tstamps.only" select="true()"/>
     
     <!-- select the intended output of the harmonize functions. Currently allowed values are: 
         'harm.thirds-based-chords.label.plain' (default)
         'harm.thirds-based-chords.chordDef' (mostly for debugging purposes)
     -->
-    <xsl:param name="harmonize.output" select="'harm.thirds-based-chords.label.plain'"/>
+    <xsl:variable name="harmonize.output" select="'harm.thirds-based-chords.label.plain'"/>
     
     <!--  -->
-    <xsl:param name="harmonize.suppress.duplicates" select="true()"/>
+    <xsl:variable name="harmonize.suppress.duplicates" select="true()"/>
     
-    <xsl:include href="tools/pick.mdiv.xsl"/>
-    <xsl:include href="tools/rescore.parts.xsl"/>
-    <xsl:include href="tools/addid.xsl"/>
-    <xsl:include href="tools/addtstamps.xsl"/>
-    <xsl:include href="anl/determine.pitch.xsl"/>
-    <xsl:include href="anl/determine.pnum.xsl"/>
+    <xsl:include href="../tools/pick.mdiv.xsl"/>
+    <xsl:include href="../tools/rescore.parts.xsl"/>
+    <xsl:include href="../tools/add.id.xsl"/>
+    <xsl:include href="../tools/addtstamps.xsl"/>
+    <xsl:include href="../anl/determine.pitch.xsl"/>
+    <xsl:include href="../anl/determine.pnum.xsl"/>
     <!--<xsl:include href="anl/determine.roman.numerals.xsl"/>-->
     <!--<xsl:include href="anl/examine.roman.base.numerals.xsl"/>-->
-    <xsl:include href="anl/determine.key.xsl"/>
+    <xsl:include href="../anl/determine.key.xsl"/>
     <!--<xsl:include href="anl/krumhansl.schmuckler.xsl"/>-->
-    <xsl:include href="anl/determine.event.density.xsl"/>
-    <xsl:include href="anl/extract.melodic.lines.xsl"/>
-    <xsl:include href="tools/add.next.xsl"/>
-    <xsl:include href="tools/add.intm.xsl"/>
+    <xsl:include href="../anl/determine.event.density.xsl"/>
+    <xsl:include href="../anl/extract.melodic.lines.xsl"/>
+    <xsl:include href="../tools/add.next.xsl"/>
+    <xsl:include href="../tools/add.intm.xsl"/>
     <!--<xsl:include href="anl/insert.harmonies.xsl"/>-->
-    <xsl:include href="anl/interprete.harmonies.xsl"/>
+    <xsl:include href="../anl/interprete.harmonies.xsl"/>
     <!--<xsl:include href="anl/determine.chords.xsl"/>-->
-    <xsl:include href="tools/disable.staves.xsl"/>
+    <xsl:include href="../tools/disable.staves.xsl"/>
     <!--<xsl:include href="anl/clean.up.xsl"/>-->
 
-    <xsl:include href="data/circleOf5.xsl"/>
+    <xsl:include href="../data/circleOf5.xsl"/>
 
     <xsl:template match="/">
         <xsl:variable name="picked.mdiv" as="node()">
